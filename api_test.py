@@ -7,8 +7,9 @@ def get_weather(api_key, city_name):
         'appid': api_key,
         'units': 'metric'  # Use 'imperial' for Fahrenheit
     }
-    response = requests.get(base_url, params=params)
-    if response.status_code == 200:
+    try:
+        response = requests.get(base_url, params=params, timeout=10)  # Set a timeout for the request
+        response.raise_for_status()  # Raise an HTTPError for bad responses
         data = response.json()
         weather = {
             'city': data['name'],
@@ -19,8 +20,9 @@ def get_weather(api_key, city_name):
             'wind_speed': data['wind']['speed']
         }
         return weather
-    else:
-        return None
+    except requests.exceptions.Timeout as timeout_err:
+        print(f"Timeout error occurred: {timeout_err}")
+    return None
 
 if __name__ == "__main__":
     api_key = "d8ed53877b624518b5601493d68ba014"  # Replace with your OpenWeatherMap API key
